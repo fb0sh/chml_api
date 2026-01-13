@@ -1,5 +1,5 @@
 pub use super::{
-    BASE_URL, ChmlApi, init_logger,
+    ChmlApi, init_logger,
     res::{ApiError, ApiResponse, ApiResult},
 };
 

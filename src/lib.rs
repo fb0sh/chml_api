@@ -1,10 +1,13 @@
 use crate::res::ApiError;
-
+// utils
 pub mod prelude;
 pub mod res;
+// modules
+pub mod tunnel;
 pub mod user;
 
-pub const BASE_URL: &str = "http://cf-v2.uapis.cn";
+use dotenvy::dotenv;
+use std::env;
 
 /// 如果token能统一位置就好了，可以更抽象和简化，一般都用 Authorization: Bearer <token> 这种形式
 pub struct ChmlApi {
@@ -20,6 +23,17 @@ impl ChmlApi {
             token: None,
             client: reqwest::Client::new(),
         }
+    }
+
+    pub fn from_env() -> Result<Self, std::env::VarError> {
+        dotenv().ok();
+        let base_url = env::var("CHML_API_BASE_URL")?;
+        let token = env::var("CHML_API_TOKEN")?;
+        Ok(Self {
+            base_url,
+            token: Some(token),
+            client: reqwest::Client::new(),
+        })
     }
 
     pub fn new_with_token(base_url: &str, token: &str) -> Self {

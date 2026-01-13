@@ -74,7 +74,7 @@ mod tests {
     async fn test_login_success() {
         init_logger();
 
-        let mut chml_api = ChmlApi::new(crate::BASE_URL);
+        let mut chml_api = ChmlApi::from_env().unwrap();
         let login_params = function::LoginParams {
             username: "username".to_string(),
             password: "password".to_string(),
@@ -87,7 +87,7 @@ mod tests {
     async fn test_user_info() {
         init_logger();
 
-        let mut chml_api = ChmlApi::new(crate::BASE_URL);
+        let mut chml_api = ChmlApi::from_env().unwrap();
         let login_params = function::LoginParams {
             username: "username".to_string(),
             password: "password".to_string(),
