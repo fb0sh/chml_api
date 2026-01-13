@@ -165,7 +165,7 @@ api.register(&register_params).await?;
 ```rust
 let api = ChmlApi::new(BASE_URL);
 let email_params = SendEmailCodeParams {
-    r#type: "1".to_string(),  // 1: 注册, 2: 重置 token
+    r#type: "register".to_string(),  // 1: register, 2: retoken
     mail: "user@example.com".to_string(),
     lot_number: "lot_number".to_string(),
     captcha_output: "captcha".to_string(),
