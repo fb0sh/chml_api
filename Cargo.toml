@@ -2,6 +2,13 @@
 name = "chml_api"
 version = "0.1.0"
 edition = "2024"
+description = "Rust SDK for chml"
+authors = ["fb0sh <fb0sh@outlook.com>"]
+license = "MIT"
+repository = "https://github.com/fb0sh/chml_api"
+readme = "README.md"
+keywords = ["chml", "api"]
+categories = ["api-bindings"]
 
 [dependencies]
 tokio = { version = "1", features = ["full"] }
