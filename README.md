@@ -42,6 +42,13 @@ Rust SDK for ChmlFrp - 一个用于与 ChmlFrp API 交互的 Rust 客户端库�
 - ✅ 获取用户操作日志
 - ✅ 获取系统消息列表
 
+### 域名管理
+- ✅ 获取可用域名列表
+- ✅ 获取用户的免费域名
+- ✅ 创建免费子域名
+- ✅ 删除免费子域名
+- ✅ 更新免费子域名
+
 ### 其他
 - 📝 完整的日志追踪
 - 🛡️ 类型安全的 API 响应处理
@@ -53,7 +60,7 @@ Rust SDK for ChmlFrp - 一个用于与 ChmlFrp API 交互的 Rust 客户端库�
 
 ```toml
 [dependencies]
-chml_api = "0.1.4"
+chml_api = "0.1.5"
 ```
 
 ## 快速开始
@@ -109,6 +116,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let messages_result = api.get_messages(1, 10, 0).await?.into_result()?;
     println!("总消息数: {}", messages_result.total);
 
+    // 获取可用域名列表
+    let domains = api.list_available_domains().await?.into_result()?;
+    println!("可用域名数: {}", domains.len());
+
+    // 获取用户的免费域名
+    let user_domains = api.get_user_free_domains().await?.into_result()?;
+    println!("我的域名数: {}", user_domains.len());
+
     Ok(())
 }
 ```
@@ -128,6 +143,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
   - [面板管理](#面板管理)
   - [节点管理](#节点管理)
   - [工具/日志管理](#工具日志管理)
+  - [域名管理](#域名管理)
   - [其他功能](#其他功能)
 - [数据结构](#数据结构)
   - [UserInfo](#userinfo)
@@ -141,6 +157,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
   - [NodeUptime](#nodeuptime)
   - [UserLog](#userlog)
   - [Message](#message)
+  - [Domain](#domain)
+  - [UserDomain](#userdomain)
   - [ApiResponse](#apiresponse)
 - [错误处理](#错误处理)
 - [依赖项](#依赖项)
@@ -448,6 +466,71 @@ for message in messages_result.messages {
 }
 ```
 
+### 域名管理
+
+#### 获取可用域名列表
+
+```rust
+let domains = api.list_available_domains().await?.into_result()?;
+for domain in domains {
+    println!("域名: {}", domain.domain);
+    println!("备注: {:?}", domain.remarks);
+    println!("ICP 备案: {}", domain.icpFiling);
+}
+```
+
+#### 获取用户的免费域名
+
+```rust
+let user_domains = api.get_user_free_domains().await?.into_result()?;
+for domain in user_domains {
+    println!("域名: {}", domain.domain);
+    println!("记录: {}", domain.record);
+    println!("类型: {}", domain.r#type);
+    println!("目标: {}", domain.target);
+    println!("TTL: {}", domain.ttl);
+    println!("备注: {:?}", domain.remarks);
+}
+```
+
+#### 创建免费子域名
+
+```rust
+use chml_api::domain::function::CreateDomainParams;
+
+let params = CreateDomainParams {
+    domain: "example.com".to_string(),
+    record: "www".to_string(),
+    r#type: "A".to_string(),
+    ttl: "10分钟".to_string(),
+    target: "1.2.3.4".to_string(),
+    remarks: Some("我的网站".to_string()),
+};
+api.create_free_subdomain(&params).await?;
+```
+
+#### 删除免费子域名
+
+```rust
+api.delete_free_subdomain("example.com", "www").await?;
+```
+
+#### 更新免费子域名
+
+```rust
+use chml_api::domain::function::CreateDomainParams;
+
+let params = CreateDomainParams {
+    domain: "example.com".to_string(),
+    record: "www".to_string(),
+    r#type: "A".to_string(),
+    ttl: "30分钟".to_string(),
+    target: "5.6.7.8".to_string(),
+    remarks: Some("更新后的网站".to_string()),
+};
+api.update_free_subdomain(&params).await?;
+```
+
 ### 其他功能
 
 #### 每日签到
@@ -704,6 +787,32 @@ pub struct Message {
     pub title: String,       // 消息标题
     pub priority: u8,        // 消息优先级
     pub user: bool,          // 是否是用户消息
+}
+```
+
+### Domain
+
+```rust
+pub struct Domain {
+    pub id: u64,
+    pub domain: String,       // 域名
+    pub remarks: Option<String>, // 备注
+    pub icpFiling: bool,    // 是否 ICP 备案
+}
+```
+
+### UserDomain
+
+```rust
+pub struct UserDomain {
+    pub id: u64,
+    pub userid: u64,        // 用户 ID
+    pub domain: String,       // 域名
+    pub record: String,      // 记录（如 www）
+    pub r#type: String,     // 类型（如 A, CNAME）
+    pub target: String,      // 目标地址
+    pub remarks: Option<String>, // 备注
+    pub ttl: String,         // TTL（如 "10分钟"）
 }
 ```
 
