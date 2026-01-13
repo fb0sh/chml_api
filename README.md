@@ -1,9 +1,14 @@
 # chml_api
 
+[![Crates.io](https://img.shields.io/crates/v/chml_api)](https://crates.io/crates/chml_api)
+[![Documentation](https://docs.rs/chml_api/badge.svg)](https://docs.rs/chml_api)
+[![License](https://img.shields.io/crates/l/chml_api)](https://github.com/fb0sh/chml_api)
+
 Rust SDK for chml - 一个用于与 chml API 交互的 Rust 客户端库。
 
 ## 功能特性
 
+### 用户管理
 - ✅ 用户登录与认证
 - ✅ 用户注册
 - ✅ 邮箱验证码发送
@@ -12,8 +17,18 @@ Rust SDK for chml - 一个用于与 chml API 交互的 Rust 客户端库。
 - ✅ 每日签到
 - ✅ 密码重置
 - ✅ 用户信息更新（用户名、QQ、头像等）
+
+### 隧道管理
+- ✅ 获取隧道列表
+- ✅ 创建隧道
+- ✅ 删除隧道
+- ✅ 更新隧道配置
+- ✅ 获取隧道配置文件
+
+### 其他
 - 📝 完整的日志追踪
 - 🛡️ 类型安全的 API 响应处理
+- 🔌 支持环境变量配置
 
 ## 安装
 
@@ -21,10 +36,39 @@ Rust SDK for chml - 一个用于与 chml API 交互的 Rust 客户端库。
 
 ```toml
 [dependencies]
-chml_api = "0.1.0"
+chml_api = "0.1.2"
 ```
 
 ## 快速开始
+
+### 使用环境变量（推荐）
+
+创建 `.env` 文件：
+
+```env
+CHML_API_BASE_URL=http://cf-v2.uapis.cn
+CHML_API_TOKEN=your_token_here
+```
+
+```rust
+use chml_api::prelude::*;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // 从环境变量加载配置
+    let api = ChmlApi::from_env()?;
+
+    // 获取用户信息
+    let user_info = api.user_info().await?.into_result()?;
+    println!("用户名: {}", user_info.username);
+
+    // 获取隧道列表
+    let tunnels = api.tunnel().await?.into_result()?;
+    println!("隧道数量: {}", tunnels.len());
+
+    Ok(())
+}
+```
 
 ### 基本使用
 
@@ -146,6 +190,66 @@ api.update_qq("123456789").await?;
 api.update_userimg("https://example.com/avatar.jpg").await?;
 ```
 
+### 隧道管理
+
+#### 获取隧道列表
+
+```rust
+let tunnels = api.tunnel().await?.into_result()?;
+for tunnel in tunnels {
+    println!("隧道名称: {}, 状态: {}", tunnel.name, tunnel.state);
+}
+```
+
+#### 创建隧道
+
+```rust
+let params = CreateTunnelParams {
+    token: api.get_token()?.to_string(),
+    tunnelname: "my_tunnel".to_string(),
+    node: "中国香港".to_string(),
+    localip: "127.0.0.1".to_string(),
+    port_type: "TCP".to_string(),
+    local_port: 8080,
+    encryption: false,
+    compression: false,
+    extra_params: "".to_string(),
+    remote_port: 12345,
+};
+let tunnel = api.create_tunnel(&params).await?.into_result()?;
+println!("创建的隧道 ID: {:?}", tunnel.id);
+```
+
+#### 更新隧道
+
+```rust
+let tunnel_update = TunnelUpdate {
+    tunnelid: 123456,
+    tunnelname: "updated_tunnel".to_string(),
+    node: "中国香港".to_string(),
+    port_type: "tcp".to_string(),
+    localport: 8080,
+    encryption: false,
+    compression: false,
+    localip: "127.0.0.1".to_string(),
+    remoteport: 12345,
+};
+let tunnel = api.update_tunnel(tunnel_update).await?.into_result()?;
+```
+
+#### 删除隧道
+
+```rust
+api.delete_tunnel("123456").await?;
+```
+
+#### 获取隧道配置文件
+
+```rust
+let config = api.tunnel_config("中国香港", &["tunnel1", "tunnel2"]).await?.into_result()?;
+println!("配置文件:\n{}", config);
+```
+
 ### 其他功能
 
 #### 每日签到
@@ -204,6 +308,47 @@ pub struct UserInfo {
 }
 ```
 
+### Tunnel
+
+```rust
+pub struct Tunnel {
+    pub id: Option<u64>,
+    pub name: String,
+    pub localip: String,
+    pub r#type: String,  // "tcp" 或 "udp"
+    pub nport: u16,      // 本地端口
+    pub dorp: String,    // 远程端口（字符串形式）
+    pub state: bool,     // 隧道状态
+    pub userid: u64,
+    pub encryption: bool,
+    pub compression: bool,
+    pub ap: String,
+    pub uptime: Option<String>,
+    pub client_version: Option<String>,
+    pub today_traffic_in: Option<u64>,
+    pub today_traffic_out: Option<u64>,
+    pub cur_conns: Option<u32>,
+    pub nodestate: Option<String>,
+    pub ip: Option<String>,
+}
+```
+
+### TunnelUpdate
+
+```rust
+pub struct TunnelUpdate {
+    pub tunnelid: u64,
+    pub tunnelname: String,
+    pub node: String,
+    pub port_type: String,
+    pub localport: u16,
+    pub encryption: bool,
+    pub compression: bool,
+    pub localip: String,
+    pub remoteport: u16,
+}
+```
+
 ### ApiResponse
 
 ```rust
@@ -252,6 +397,14 @@ init_logger();
 - `reqwest` - HTTP 客户端
 - `thiserror` - 错误处理
 - `tracing` / `tracing-subscriber` - 日志追踪
+- `dotenvy` - 环境变量加载
+
+## 环境变量
+
+支持通过环境变量配置 API 客户端：
+
+- `CHML_API_BASE_URL` - API 基础 URL（默认：`http://cf-v2.uapis.cn`）
+- `CHML_API_TOKEN` - 认证 Token
 
 ## 许可证
 
@@ -264,3 +417,7 @@ fb0sh <fb0sh@outlook.com>
 ## 仓库
 
 https://github.com/fb0sh/chml_api
+
+## Crates.io
+
+https://crates.io/crates/chml_api
