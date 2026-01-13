@@ -29,6 +29,13 @@ Rust SDK for ChmlFrp - 一个用于与 ChmlFrp API 交互的 Rust 客户端库�
 - ✅ 获取面板信息（隧道数、节点数、用户数等）
 - ✅ 获取服务器状态（CPU、内存、负载等指标）
 
+### 节点管理
+- ✅ 获取节点列表
+- ✅ 获取节点详细信息
+- ✅ 获取节点统计信息
+- ✅ 获取节点运行时间
+- ✅ 获取节点状态
+
 ### 其他
 - 📝 完整的日志追踪
 - 🛡️ 类型安全的 API 响应处理
@@ -80,9 +87,48 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("服务器: {}", server_status.server_name);
     println!("CPU: {}%", server_status.metrics.cpu);
 
+    // 获取节点列表
+    let nodes = api.node().await?.into_result()?;
+    println!("可用节点数: {}", nodes.len());
+
+    // 获取节点详细信息
+    let node_info = api.nodeinfo("南京电信-2").await?.into_result()?;
+    println!("节点状态: {}", node_info.state);
+
     Ok(())
 }
 ```
+
+## 目录
+
+- [功能特性](#功能特性)
+- [安装](#安装)
+- [快速开始](#快速开始)
+  - [使用环境变量（推荐）](#使用环境变量推荐)
+  - [基本使用](#基本使用)
+  - [使用已有 Token](#使用已有-token)
+- [API 文档](#api-文档)
+  - [用户认证](#用户认证)
+  - [用户信息](#用户信息)
+  - [隧道管理](#隧道管理)
+  - [面板管理](#面板管理)
+  - [节点管理](#节点管理)
+  - [其他功能](#其他功能)
+- [数据结构](#数据结构)
+  - [UserInfo](#userinfo)
+  - [Tunnel](#tunnel)
+  - [TunnelUpdate](#tunnelupdate)
+  - [PanelInfo](#panelinfo)
+  - [ServerMetrics](#servermetrics)
+  - [Node](#node)
+  - [NodeInfo](#nodeinfo)
+  - [NodeStats](#nodestats)
+  - [NodeUptime](#nodeuptime)
+  - [ApiResponse](#apiresponse)
+- [错误处理](#错误处理)
+- [依赖项](#依赖项)
+- [环境变量](#环境变量)
+- [许可证](#许可证)
 
 ### 基本使用
 
@@ -290,6 +336,64 @@ println!("内存使用率: {}%", server_status.metrics.memory);
 println!("IO 延迟: {}", server_status.metrics.io_latency);
 ```
 
+### 节点管理
+
+#### 获取节点列表
+
+```rust
+let nodes = api.node().await?.into_result()?;
+for node in nodes {
+    println!("节点名称: {}, 区域: {}", node.name, node.area);
+}
+```
+
+#### 获取节点详细信息
+
+```rust
+let node_info = api.nodeinfo("南京电信-2").await?.into_result()?;
+println!("节点 ID: {}", node_info.id);
+println!("节点名称: {}", node_info.name);
+println!("区域: {}", node_info.area);
+println!("状态: {}", node_info.state);
+println!("端口: {}", node_info.port);
+println!("IP: {}", node_info.ip);
+println!("版本: {}", node_info.version);
+println!("带宽使用率: {}%", node_info.bandwidth_usage_percent);
+```
+
+#### 获取节点统计信息
+
+```rust
+let node_stats = api.node_stats().await?.into_result()?;
+for stats in node_stats {
+    println!("节点: {}", stats.node_name);
+    println!("状态: {}", stats.state);
+    println!("CPU 使用率: {}%", stats.cpu_usage);
+    println!("带宽使用率: {}%", stats.bandwidth_usage_percent);
+    println!("隧道数: {}", stats.tunnel_counts);
+}
+```
+
+#### 获取节点运行时间
+
+```rust
+let uptime = api.node_uptime("南京电信-2", 7).await?.into_result()?;
+for record in uptime.history_uptime {
+    println!("日期: {}, 运行时间: {}%", record.recorded_at, record.uptime);
+}
+```
+
+#### 获取节点状态
+
+```rust
+let node_status = api.node_status("南京电信-2").await?.into_result()?;
+println!("节点名称: {}", node_status.node_name);
+println!("总流量入: {}", node_status.node_details.total_traffic_in);
+for status in node_status.status_list {
+    println!("状态: {}", status.state);
+}
+```
+
 ### 其他功能
 
 #### 每日签到
@@ -421,6 +525,100 @@ pub struct Metrics {
     pub steal: f64,                  // CPU 窃取时间
     pub io_latency: f64,             // IO 延迟
     pub thread_contention: f64,      // 线程竞争
+}
+```
+
+### Node
+
+```rust
+pub struct Node {
+    pub id: u64,
+    pub name: String,        // 节点名称
+    pub area: String,        // 区域
+    pub nodegroup: String,   // 节点组
+    pub china: bool,         // 是否国内节点
+    pub web: bool,           // 是否支持 Web
+    pub udp: bool,           // 是否支持 UDP
+    pub fangyu: bool,        // 是否有防护
+    pub notes: String,       // 备注
+}
+```
+
+### NodeInfo
+
+```rust
+pub struct NodeInfo {
+    pub id: u64,
+    pub name: String,
+    pub area: String,
+    pub nodegroup: String,
+    pub state: String,              // 节点状态
+    pub port: u16,                  // 端口
+    pub adminPort: u16,             // 管理端口
+    pub real_IP: String,            // 真实 IP
+    pub realIp: String,             // 真实 IP
+    pub ip: String,                 // 节点 IP
+    pub auth: String,               // 认证信息
+    pub apitoken: String,           // API Token
+    pub nodetoken: String,          // 节点 Token
+    pub version: String,            // 版本
+    pub coordinates: String,        // 坐标
+    pub rport: String,             // 端口范围
+    pub totalTrafficIn: u64,        // 总入流量
+    pub totalTrafficOut: u64,       // 总出流量
+    pub bandwidth_usage_percent: u8, // 带宽使用率
+    pub load1: f64,                // 1 分钟负载
+    pub load5: f64,                // 5 分钟负载
+    pub load15: f64,               // 15 分钟负载
+    pub china: bool,
+    pub web: bool,
+    pub udp: bool,
+    pub fangyu: bool,
+    pub toowhite: bool,
+    pub notes: String,
+    pub cpu_info: Option<String>,
+    pub storage_total: Option<u64>,
+    pub storage_used: Option<u64>,
+    pub memory_total: Option<u64>,
+    pub num_cores: Option<u8>,
+    pub uptime_seconds: Option<u64>,
+    pub ipv6: Option<String>,
+}
+```
+
+### NodeStats
+
+```rust
+pub struct NodeStats {
+    pub id: u64,
+    pub node_name: String,
+    pub nodegroup: String,
+    pub state: String,
+    pub total_traffic_in: u64,
+    pub total_traffic_out: u64,
+    pub bandwidth_usage_percent: u8,
+    pub current_upload_usage_percent: u8,
+    pub cpu_usage: f64,
+    pub cur_counts: u64,
+    pub client_counts: u64,
+    pub tunnel_counts: u64,
+}
+```
+
+### NodeUptime
+
+```rust
+pub struct NodeUptime {
+    pub node_name: String,
+    pub state: String,
+    pub id: u64,
+    pub group: String,
+    pub history_uptime: Vec<UptimeRecord>,
+}
+
+pub struct UptimeRecord {
+    pub recorded_at: String,  // ISO 日期，例如 "2026-01-13"
+    pub uptime: f64,          // 百分比，例如 100.0
 }
 ```
 
