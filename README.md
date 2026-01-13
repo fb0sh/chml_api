@@ -4,7 +4,7 @@
 [![Documentation](https://docs.rs/chml_api/badge.svg)](https://docs.rs/chml_api)
 [![License](https://img.shields.io/crates/l/chml_api)](https://github.com/fb0sh/chml_api)
 
-Rust SDK for chml - 一个用于与 chml API 交互的 Rust 客户端库。
+Rust SDK for ChmlFrp - 一个用于与 ChmlFrp API 交互的 Rust 客户端库。
 
 ## 功能特性
 
@@ -40,7 +40,7 @@ Rust SDK for chml - 一个用于与 chml API 交互的 Rust 客户端库。
 
 ```toml
 [dependencies]
-chml_api = "0.1.2"
+chml_api = "0.1.3"
 ```
 
 ## 快速开始
