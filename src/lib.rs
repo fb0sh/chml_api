@@ -1,9 +1,12 @@
+use crate::res::ApiError;
+
 pub mod prelude;
 pub mod res;
 pub mod user;
 
 pub const BASE_URL: &str = "http://cf-v2.uapis.cn";
 
+/// 如果token能统一位置就好了，可以更抽象和简化，一般都用 Authorization: Bearer <token> 这种形式
 pub struct ChmlApi {
     pub base_url: String,
     pub token: Option<String>,
@@ -29,6 +32,14 @@ impl ChmlApi {
 
     pub fn endpoint(&self, path: &str) -> String {
         format!("{}{}", self.base_url, path)
+    }
+
+    pub fn set_token(&mut self, token: &str) {
+        self.token = Some(token.to_string());
+    }
+
+    pub fn get_token(&self) -> Result<&str, ApiError> {
+        self.token.as_deref().ok_or(ApiError::NoToken)
     }
 }
 

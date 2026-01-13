@@ -20,6 +20,17 @@ impl<T> ApiResponse<T> {
 
         self.data.ok_or(ApiError::EmptyData)
     }
+    pub fn as_result(&self) -> Result<&T, ApiError> {
+        if self.code != 200 || self.state != "success" {
+            return Err(ApiError::Api {
+                code: self.code,
+                state: self.state.clone(),
+                msg: self.msg.clone(),
+            });
+        }
+
+        self.data.as_ref().ok_or(ApiError::EmptyData)
+    }
 }
 
 #[derive(Debug, Error)]
@@ -30,6 +41,8 @@ pub enum ApiError {
         state: String,
         msg: String,
     },
+    #[error("no token")]
+    NoToken,
 
     #[error("api returned success but data is null")]
     EmptyData,
@@ -37,3 +50,5 @@ pub enum ApiError {
     #[error("reqwest error: {0}")]
     Reqwest(#[from] reqwest::Error),
 }
+
+pub type ApiResult<T> = Result<ApiResponse<T>, ApiError>;

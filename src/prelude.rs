@@ -1,6 +1,6 @@
 pub use super::{
     BASE_URL, ChmlApi, init_logger,
-    res::{ApiError, ApiResponse},
+    res::{ApiError, ApiResponse, ApiResult},
 };
 
 pub use tracing::{debug, error, info, trace, warn};
