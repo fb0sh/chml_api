@@ -1,6 +1,6 @@
 [package]
 name = "chml_api"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2024"
 description = "Rust SDK for ChmlFrp"
 authors = ["fb0sh <fb0sh@outlook.com>"]

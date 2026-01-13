@@ -3,6 +3,7 @@ use crate::res::ApiError;
 pub mod prelude;
 pub mod res;
 // modules
+pub mod node;
 pub mod panel;
 pub mod tunnel;
 pub mod user;
