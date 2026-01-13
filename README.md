@@ -6,6 +6,8 @@
 
 Rust SDK for ChmlFrp - 一个用于与 ChmlFrp API 交互的 Rust 客户端库。
 
+仅用AI生成文档。
+
 ## 功能特性
 
 ### 用户管理
@@ -36,6 +38,10 @@ Rust SDK for ChmlFrp - 一个用于与 ChmlFrp API 交互的 Rust 客户端库�
 - ✅ 获取节点运行时间
 - ✅ 获取节点状态
 
+### 工具/日志管理
+- ✅ 获取用户操作日志
+- ✅ 获取系统消息列表
+
 ### 其他
 - 📝 完整的日志追踪
 - 🛡️ 类型安全的 API 响应处理
@@ -47,7 +53,7 @@ Rust SDK for ChmlFrp - 一个用于与 ChmlFrp API 交互的 Rust 客户端库�
 
 ```toml
 [dependencies]
-chml_api = "0.1.3"
+chml_api = "0.1.4"
 ```
 
 ## 快速开始
@@ -95,6 +101,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let node_info = api.nodeinfo("南京电信-2").await?.into_result()?;
     println!("节点状态: {}", node_info.state);
 
+    // 获取用户操作日志
+    let logs_result = api.get_user_logs(1, 10).await?.into_result()?;
+    println!("总日志数: {}", logs_result.total);
+
+    // 获取系统消息
+    let messages_result = api.get_messages(1, 10, 0).await?.into_result()?;
+    println!("总消息数: {}", messages_result.total);
+
     Ok(())
 }
 ```
@@ -113,6 +127,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
   - [隧道管理](#隧道管理)
   - [面板管理](#面板管理)
   - [节点管理](#节点管理)
+  - [工具/日志管理](#工具日志管理)
   - [其他功能](#其他功能)
 - [数据结构](#数据结构)
   - [UserInfo](#userinfo)
@@ -124,6 +139,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
   - [NodeInfo](#nodeinfo)
   - [NodeStats](#nodestats)
   - [NodeUptime](#nodeuptime)
+  - [UserLog](#userlog)
+  - [Message](#message)
   - [ApiResponse](#apiresponse)
 - [错误处理](#错误处理)
 - [依赖项](#依赖项)
@@ -394,6 +411,43 @@ for status in node_status.status_list {
 }
 ```
 
+### 工具/日志管理
+
+#### 获取用户操作日志
+
+```rust
+let logs_result = api.get_user_logs(1, 10).await?.into_result()?;
+println!("总日志数: {}", logs_result.total);
+println!("总页数: {}", logs_result.totalPages);
+println!("当前页: {}", logs_result.page);
+
+for log in logs_result.logs {
+    println!("操作: {}", log.action);
+    println!("资源: {}", log.resource_name);
+    println!("状态: {}", log.status);
+    println!("时间: {}", log.timestamp);
+    println!("IP: {}", log.ip_address);
+    println!("地址: {}", log.address);
+}
+```
+
+#### 获取系统消息
+
+```rust
+let messages_result = api.get_messages(1, 10, 0).await?.into_result()?;
+println!("总消息数: {}", messages_result.total);
+println!("总页数: {}", messages_result.totalPages);
+println!("当前页: {}", messages_result.page);
+
+for message in messages_result.messages {
+    println!("标题: {}", message.title);
+    println!("优先级: {}", message.priority);
+    println!("发布时间: {}", message.publishTime);
+    println!("创建时间: {}", message.createdAt);
+    println!("是否用户消息: {}", message.user);
+}
+```
+
 ### 其他功能
 
 #### 每日签到
@@ -619,6 +673,37 @@ pub struct NodeUptime {
 pub struct UptimeRecord {
     pub recorded_at: String,  // ISO 日期，例如 "2026-01-13"
     pub uptime: f64,          // 百分比，例如 100.0
+}
+```
+
+### UserLog
+
+```rust
+pub struct UserLog {
+    pub address: String,      // 地址
+    pub user_id: u64,        // 用户 ID
+    pub extra_data: String,    // 额外数据（JSON 字符串）
+    pub action: String,       // 操作类型（如 create_tunnel, update_tunnel）
+    pub id: u64,            // 日志 ID
+    pub ip_address: String,   // IP 地址
+    pub category: String,      // 分类（如 tunnel）
+    pub resource_name: String, // 资源名称
+    pub user_agent: String,   // User Agent
+    pub status: String,       // 状态（如 success）
+    pub timestamp: String,     // 时间戳（ISO 8601 格式）
+}
+```
+
+### Message
+
+```rust
+pub struct Message {
+    pub publishTime: String,  // 发布时间（ISO 8601 格式）
+    pub createdAt: String,    // 创建时间（ISO 8601 格式）
+    pub id: u64,            // 消息 ID
+    pub title: String,       // 消息标题
+    pub priority: u8,        // 消息优先级
+    pub user: bool,          // 是否是用户消息
 }
 ```
 
