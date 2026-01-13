@@ -7,6 +7,7 @@ pub mod node;
 pub mod panel;
 pub mod tunnel;
 pub mod user;
+pub mod util;
 
 use dotenvy::dotenv;
 use std::env;
