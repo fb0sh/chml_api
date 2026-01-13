@@ -25,6 +25,10 @@ Rust SDK for chml - 一个用于与 chml API 交互的 Rust 客户端库。
 - ✅ 更新隧道配置
 - ✅ 获取隧道配置文件
 
+### 面板管理
+- ✅ 获取面板信息（隧道数、节点数、用户数等）
+- ✅ 获取服务器状态（CPU、内存、负载等指标）
+
 ### 其他
 - 📝 完整的日志追踪
 - 🛡️ 类型安全的 API 响应处理
@@ -65,6 +69,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 获取隧道列表
     let tunnels = api.tunnel().await?.into_result()?;
     println!("隧道数量: {}", tunnels.len());
+
+    // 获取面板信息
+    let panel_info = api.panelinfo().await?.into_result()?;
+    println!("总隧道数: {}", panel_info.tunnel_amount);
+    println!("总节点数: {}", panel_info.node_amount);
+
+    // 获取服务器状态
+    let server_status = api.server_status().await?;
+    println!("服务器: {}", server_status.server_name);
+    println!("CPU: {}%", server_status.metrics.cpu);
 
     Ok(())
 }
@@ -250,6 +264,32 @@ let config = api.tunnel_config("中国香港", &["tunnel1", "tunnel2"]).await?.i
 println!("配置文件:\n{}", config);
 ```
 
+### 面板管理
+
+#### 获取面板信息
+
+```rust
+let panel_info = api.panelinfo().await?.into_result()?;
+println!("隧道数量: {}", panel_info.tunnel_amount);
+println!("节点数量: {}", panel_info.node_amount);
+println!("用户数量: {}", panel_info.user_amount);
+
+for link in panel_info.friend_links {
+    println!("友情链接: {} - {}", link.name, link.url);
+}
+```
+
+#### 获取服务器状态
+
+```rust
+let server_status = api.server_status().await?;
+println!("服务器名称: {}", server_status.server_name);
+println!("负载: {}", server_status.load);
+println!("CPU 使用率: {}%", server_status.metrics.cpu);
+println!("内存使用率: {}%", server_status.metrics.memory);
+println!("IO 延迟: {}", server_status.metrics.io_latency);
+```
+
 ### 其他功能
 
 #### 每日签到
@@ -346,6 +386,41 @@ pub struct TunnelUpdate {
     pub compression: bool,
     pub localip: String,
     pub remoteport: u16,
+}
+```
+
+### PanelInfo
+
+```rust
+pub struct PanelInfo {
+    pub tunnel_amount: u64,           // 隧道总数
+    pub node_amount: u64,             // 节点总数
+    pub user_amount: u64,             // 用户总数
+    pub friend_links: Vec<FriendLink>, // 友情链接
+}
+
+pub struct FriendLink {
+    pub name: String,
+    pub description: Option<String>,
+    pub url: String,
+}
+```
+
+### ServerMetrics
+
+```rust
+pub struct ServerMetrics {
+    pub metrics: Metrics,
+    pub server_name: String,  // 服务器名称
+    pub load: f64,            // 负载
+}
+
+pub struct Metrics {
+    pub cpu: f64,                    // CPU 使用率
+    pub memory: f64,                 // 内存使用率
+    pub steal: f64,                  // CPU 窃取时间
+    pub io_latency: f64,             // IO 延迟
+    pub thread_contention: f64,      // 线程竞争
 }
 ```
 
