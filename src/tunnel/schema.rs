@@ -9,6 +9,7 @@ pub struct Tunnel {
     pub r#type: String, // 避免关键字冲突
     pub nport: u16,
     pub dorp: String,
+    pub node: String,
     #[serde(deserialize_with = "str_to_bool")]
     pub state: bool, // "true"/"false" -> bool
     pub userid: u64,
