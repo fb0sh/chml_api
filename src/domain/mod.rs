@@ -1,7 +1,7 @@
+pub mod function;
+pub mod schema;
 use crate::ChmlApi;
 use crate::res::ApiResult;
-mod function;
-mod schema;
 
 impl ChmlApi {
     /// get available domains

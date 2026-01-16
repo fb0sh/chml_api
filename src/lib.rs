@@ -61,6 +61,15 @@ impl ChmlApi {
     }
 }
 
+pub mod schema {
+    pub use super::domain::schema::{Domain, UserDomain};
+    pub use super::node::schema::{Node, NodeDetails, NodeInfo, NodeStats, NodeStatus, NodeUptime};
+    pub use super::panel::schema::{FriendLink, Metrics, PanelInfo, ServerMetrics};
+    pub use super::tunnel::schema::{Tunnel, TunnelUpdate};
+    pub use super::user::schema::UserInfo;
+    pub use super::util::schema::{Message, UserLog};
+}
+
 pub fn init_logger() {
     let subscriber = tracing_subscriber::FmtSubscriber::builder()
         .with_env_filter("debug") // RUST_LOG=debug 可覆盖

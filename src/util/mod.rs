@@ -1,7 +1,6 @@
+pub mod function;
+pub mod schema;
 use crate::{ChmlApi, res::ApiResult};
-
-mod function;
-mod schema;
 
 impl ChmlApi {
     /// user logs

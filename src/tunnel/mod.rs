@@ -1,5 +1,5 @@
-mod function;
-mod schema;
+pub mod function;
+pub mod schema;
 
 use crate::{ChmlApi, res::ApiResult};
 
