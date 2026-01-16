@@ -2,7 +2,7 @@ use serde::Deserialize;
 use serde::Deserializer;
 use serde::Serialize;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct Node {
     pub id: u64,
     pub name: String,
@@ -19,7 +19,7 @@ pub struct Node {
     pub notes: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct NodeInfo {
     pub id: u64,
     pub name: String,
@@ -64,7 +64,7 @@ pub struct NodeInfo {
     pub ipv6: Option<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct NodeStats {
     pub id: u64,
     pub node_name: String,
@@ -79,7 +79,7 @@ pub struct NodeStats {
     pub client_counts: u64,
     pub tunnel_counts: u64,
 }
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct NodeUptime {
     pub node_name: String,
     pub state: String,
@@ -88,13 +88,13 @@ pub struct NodeUptime {
     pub history_uptime: Vec<UptimeRecord>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct UptimeRecord {
     pub recorded_at: String, // ISO 日期，例如 "2026-01-13"
     pub uptime: f64,         // 百分比，例如 100.0
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct NodeDetails {
     pub total_traffic_in: u64,
     pub cpu_info: Option<String>,
@@ -110,7 +110,7 @@ pub struct NodeDetails {
     pub storage_used: Option<u64>,
     pub load15: f64,
 }
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct NodeStatus {
     pub proxy_https: u32,
     pub download_bandwidth_usage_percent: u32,

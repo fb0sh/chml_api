@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Domain {
     pub id: u64,
     pub domain: String,
@@ -8,7 +8,7 @@ pub struct Domain {
     pub icpFiling: bool,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserDomain {
     pub id: u64,
     pub userid: u64,

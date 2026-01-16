@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct UserLog {
     pub address: String,
     pub user_id: u64,
@@ -15,7 +15,7 @@ pub struct UserLog {
     pub timestamp: String, // 或者 chrono::DateTime<FixedOffset>
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Message {
     pub publishTime: String, // 发布时间，ISO 8601 格式
     pub createdAt: String,   // 创建时间，ISO 8601 格式

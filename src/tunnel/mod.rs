@@ -54,6 +54,7 @@ mod tests {
         init_logger();
         let chml_api = ChmlApi::from_env().unwrap();
 
+        // 10000-65535 动态生成的话返回409则再次尝试
         let params = function::CreateTunnelParams {
             token: chml_api.get_token().unwrap().to_string(),
             tunnelname: "dyTi7y8a".to_string(),

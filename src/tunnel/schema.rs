@@ -1,6 +1,6 @@
 use serde::{Deserialize, Deserializer, Serialize};
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Tunnel {
     pub id: Option<u64>, // 可能为 null
     pub name: String,
@@ -26,7 +26,7 @@ pub struct Tunnel {
     pub nodestate: Option<String>,
     pub ip: Option<String>,
 }
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct TunnelUpdate {
     pub tunnelid: u64,
     pub tunnelname: String,

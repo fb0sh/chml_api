@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct PanelInfo {
     pub tunnel_amount: u64,
     pub node_amount: u64,
@@ -8,14 +8,14 @@ pub struct PanelInfo {
     pub friend_links: Vec<FriendLink>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct FriendLink {
     pub name: String,
     pub description: Option<String>, // JSON 中可能为 null
     pub url: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct ServerMetrics {
     pub metrics: Metrics,
     #[serde(rename = "serverName")]
@@ -23,7 +23,7 @@ pub struct ServerMetrics {
     pub load: f64,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct Metrics {
     pub cpu: f64,
     pub memory: f64,
