@@ -49,6 +49,11 @@ pub enum ApiError {
 
     #[error("reqwest error: {0}")]
     Reqwest(#[from] reqwest::Error),
+
+    #[error("{0} not found")]
+    NotFound(String),
+    #[error("{0}")]
+    GenericError(String),
 }
 
 pub type ApiResult<T> = Result<ApiResponse<T>, ApiError>;

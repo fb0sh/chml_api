@@ -1,7 +1,11 @@
 pub mod function;
 pub mod schema;
 
-use crate::{ChmlApi, res::ApiResult};
+use crate::{
+    ChmlApi,
+    res::{ApiError, ApiResult},
+    schema::Tunnel,
+};
 
 impl ChmlApi {
     /// get_tunnels
@@ -33,6 +37,33 @@ impl ChmlApi {
     /// tunnel_config
     pub async fn tunnel_config(&self, node: &str, tunnel_names: &[&str]) -> ApiResult<String> {
         function::get_tunnel_config(self, node, tunnel_names).await
+    }
+
+    pub async fn _select_tunnel(
+        &self,
+        tunnel_name: Option<&str>,
+        tunnel_id: Option<u64>,
+    ) -> Result<Tunnel, ApiError> {
+        let tunnels = self.tunnel().await?.into_result()?;
+        let tunnel = match (tunnel_name, tunnel_id) {
+            (Some(name), _) => tunnels
+                .into_iter()
+                .find(|t| t.name.contains(name))
+                .ok_or_else(|| ApiError::NotFound(format!("tunnel '{}' not found", name)))?,
+
+            (None, Some(id)) => tunnels
+                .into_iter()
+                .find(|t| t.id == Some(id))
+                .ok_or_else(|| ApiError::NotFound(format!("tunnel id '{}' not found", id)))?,
+
+            _ => {
+                return Err(ApiError::GenericError(
+                    "either tunnel_name or tunnel_id must be provided".into(),
+                ));
+            }
+        };
+
+        Ok(tunnel)
     }
 }
 
