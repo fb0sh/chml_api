@@ -2,7 +2,7 @@ use serde::Deserialize;
 use serde::Deserializer;
 use serde::Serialize;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Node {
     pub id: u64,
     pub name: String,
@@ -19,7 +19,7 @@ pub struct Node {
     pub notes: String,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NodeInfo {
     pub id: u64,
     pub name: String,
@@ -79,7 +79,7 @@ pub struct NodeStats {
     pub client_counts: u64,
     pub tunnel_counts: u64,
 }
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NodeUptime {
     pub node_name: String,
     pub state: String,
@@ -88,7 +88,7 @@ pub struct NodeUptime {
     pub history_uptime: Vec<UptimeRecord>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UptimeRecord {
     pub recorded_at: String, // ISO 日期，例如 "2026-01-13"
     pub uptime: f64,         // 百分比，例如 100.0
