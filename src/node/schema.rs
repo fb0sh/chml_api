@@ -1,6 +1,8 @@
 use serde::Deserialize;
 use serde::Deserializer;
 use serde::Serialize;
+use serde::de;
+use std::fmt;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Node {
@@ -8,13 +10,13 @@ pub struct Node {
     pub name: String,
     pub area: String,
     pub nodegroup: String,
-    #[serde(deserialize_with = "yes_no_to_bool")]
+    #[serde(deserialize_with = "bool_from_str_or_bool")]
     pub china: bool,
-    #[serde(deserialize_with = "yes_no_to_bool")]
+    #[serde(deserialize_with = "bool_from_str_or_bool")]
     pub web: bool,
-    #[serde(deserialize_with = "str_to_bool")]
+    #[serde(deserialize_with = "bool_from_str_or_bool")]
     pub udp: bool,
-    #[serde(deserialize_with = "str_to_bool")]
+    #[serde(deserialize_with = "bool_from_str_or_bool")]
     pub fangyu: bool,
     pub notes: String,
 }
@@ -43,13 +45,13 @@ pub struct NodeInfo {
     pub load1: f64,
     pub load5: f64,
     pub load15: f64,
-    #[serde(deserialize_with = "yes_no_to_bool")]
+    #[serde(deserialize_with = "bool_from_str_or_bool")]
     pub china: bool,
-    #[serde(deserialize_with = "yes_no_to_bool")]
+    #[serde(deserialize_with = "bool_from_str_or_bool")]
     pub web: bool,
-    #[serde(deserialize_with = "str_to_bool")]
+    #[serde(deserialize_with = "bool_from_str_or_bool")]
     pub udp: bool,
-    #[serde(deserialize_with = "str_to_bool")]
+    #[serde(deserialize_with = "bool_from_str_or_bool")]
     pub fangyu: bool,
     pub toowhite: bool,
     pub notes: String,
@@ -129,20 +131,35 @@ pub struct NodeStatus {
     pub timestamp: String, // 或者用 chrono::DateTime
     pub client_counts: u32,
 }
-// "yes"/"no" -> bool
-fn yes_no_to_bool<'de, D>(deserializer: D) -> Result<bool, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let s: String = Deserialize::deserialize(deserializer)?;
-    Ok(s.eq_ignore_ascii_case("yes"))
-}
 
-// "true"/"false" -> bool
-fn str_to_bool<'de, D>(deserializer: D) -> Result<bool, D::Error>
+pub fn bool_from_str_or_bool<'de, D>(deserializer: D) -> Result<bool, D::Error>
 where
     D: Deserializer<'de>,
 {
-    let s: String = Deserialize::deserialize(deserializer)?;
-    Ok(s.eq_ignore_ascii_case("true"))
+    struct Visitor;
+
+    impl<'de> de::Visitor<'de> for Visitor {
+        type Value = bool;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("a bool or a string representing a bool")
+        }
+
+        fn visit_bool<E>(self, v: bool) -> Result<Self::Value, E> {
+            Ok(v)
+        }
+
+        fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+        where
+            E: de::Error,
+        {
+            match v.to_lowercase().as_str() {
+                "yes" | "true" => Ok(true),
+                "no" | "false" => Ok(false),
+                other => Err(E::custom(format!("invalid boolean string: {}", other))),
+            }
+        }
+    }
+
+    deserializer.deserialize_any(Visitor)
 }
